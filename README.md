@@ -12,7 +12,7 @@ Colorful priority-based to-do list app — HTML/CSS/JS, Firebase Auth (Google SS
 ## 1. Enable Google Sign-In
 Firebase Console → your project (`prooritybasedtasktracker`) → **Authentication** → **Sign-in method** → enable **Google** → set a support email → Save.
 
-Also add your hosting domain (e.g. `localhost`, or your deployed domain) under **Authentication → Settings → Authorized domains**.
+Also add your hosting domain under **Authentication → Settings → Authorized domains**: `localhost` (local dev), `<username>.github.io` (GitHub Pages default domain), and `tasks.aiwithsrinivas.online` (custom domain).
 
 ## 2. Create Firestore Database
 Firebase Console → **Firestore Database** → **Create database** → choose **Production mode** → pick a region.
@@ -41,7 +41,22 @@ npx serve .
 
 Then visit `http://localhost:5500`.
 
-## 5. How it works
+## 5. Deployment (GitHub Pages)
+This app is a static site (no build step), so it's hosted directly on **GitHub Pages**:
+
+1. Push to the `master` branch on GitHub.
+2. Repo → **Settings → Pages** → Source: **Deploy from a branch** → Branch: `master`, folder: `/ (root)`.
+3. Under **Custom domain**, enter `tasks.aiwithsrinivas.online` (this repo already has a `CNAME` file with that value, so GitHub Pages will pick it up automatically).
+4. At your domain registrar's DNS settings for `aiwithsrinivas.online`, add a **CNAME record**:
+   - Host/Name: `tasks`
+   - Value/Target: `<your-github-username>.github.io`
+   - TTL: default
+5. Wait for DNS to propagate (a few minutes to a few hours), then GitHub Pages will issue an HTTPS certificate for the subdomain automatically.
+6. Add `tasks.aiwithsrinivas.online` to Firebase Console → Authentication → Settings → **Authorized domains**, otherwise Google Sign-In will be blocked on that domain.
+
+Any push to `master` auto-redeploys the Pages site — no manual deploy step needed.
+
+## 6. How it works
 - **Login** — Google SSO popup via `firebase.auth.GoogleAuthProvider()`.
 - **Dashboard** — stat cards + 3 charts (pie by priority, bar completed/pending by priority, donut overall progress), plus a "Needs Attention" list grouped by priority.
 - **My Tasks** — full task list with filter chips (All / High / Medium / Low / Completed), click a card to edit, checkbox circle to toggle complete.
