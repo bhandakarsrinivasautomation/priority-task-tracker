@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Priority Task Tracker</title>
+<link rel="stylesheet" href="style.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<!-- ===================== LOGIN SCREEN ===================== -->
+<div id="loginScreen" class="login-screen">
+  <div class="login-card">
+    <div class="login-logo">✅</div>
+    <h1>Priority Task Tracker</h1>
+    <p>Organize your day. Colorful, priority-first task management.</p>
+    <button id="googleLoginBtn" class="btn-google">
+      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" />
+      Sign in with Google
+    </button>
+    <p id="loginError" class="login-error"></p>
+  </div>
+</div>
+
+<!-- ===================== APP SHELL ===================== -->
+<div id="appShell" class="app-shell hidden">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="brand">
+      <span class="brand-icon">✅</span>
+      <span class="brand-text">TaskFlow</span>
+    </div>
+
+    <nav class="nav-menu">
+      <button class="nav-item active" data-view="dashboard">
+        <span class="nav-icon">📊</span> Dashboard
+      </button>
+      <button class="nav-item" data-view="tasks">
+        <span class="nav-icon">📋</span> My Tasks
+      </button>
+      <button class="nav-item" id="adminNavBtn" data-view="admin" style="display:none;">
+        <span class="nav-icon">🛡️</span> Admin Panel
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-card">
+        <img id="userPhoto" class="user-photo" src="" alt="user" />
+        <div class="user-info">
+          <span id="userName" class="user-name">—</span>
+          <span id="userEmail" class="user-email">—</span>
+        </div>
+      </div>
+      <button id="logoutBtn" class="btn-logout">Logout</button>
+    </div>
+  </aside>
+
+  <!-- Main content -->
+  <main class="main-content">
+
+    <!-- ---------- DASHBOARD VIEW ---------- -->
+    <section id="dashboardView" class="view">
+      <header class="view-header">
+        <div>
+          <h2>Dashboard</h2>
+          <p class="subtitle">Your tasks, organized by priority</p>
+        </div>
+        <button class="btn-primary" id="addTaskBtnDash">+ New Task</button>
+      </header>
+
+      <div class="stat-cards">
+        <div class="stat-card stat-total">
+          <span class="stat-value" id="statTotal">0</span>
+          <span class="stat-label">Total Tasks</span>
+        </div>
+        <div class="stat-card stat-high">
+          <span class="stat-value" id="statHigh">0</span>
+          <span class="stat-label">High Priority</span>
+        </div>
+        <div class="stat-card stat-medium">
+          <span class="stat-value" id="statMedium">0</span>
+          <span class="stat-label">Medium Priority</span>
+        </div>
+        <div class="stat-card stat-low">
+          <span class="stat-value" id="statLow">0</span>
+          <span class="stat-label">Low Priority</span>
+        </div>
+        <div class="stat-card stat-done">
+          <span class="stat-value" id="statDone">0</span>
+          <span class="stat-label">Completed</span>
+        </div>
+      </div>
+
+      <div class="charts-grid">
+        <div class="chart-card">
+          <h3>Tasks by Priority</h3>
+          <canvas id="priorityPieChart"></canvas>
+        </div>
+        <div class="chart-card">
+          <h3>Status by Priority</h3>
+          <canvas id="priorityBarChart"></canvas>
+        </div>
+        <div class="chart-card chart-card-wide">
+          <h3>Completion Progress</h3>
+          <canvas id="progressDonutChart"></canvas>
+        </div>
+      </div>
+
+      <div class="priority-groups" id="dashboardPriorityGroups"></div>
+    </section>
+
+    <!-- ---------- MY TASKS VIEW ---------- -->
+    <section id="tasksView" class="view hidden">
+      <header class="view-header">
+        <div>
+          <h2>My Tasks</h2>
+          <p class="subtitle">All your activities in one place</p>
+        </div>
+        <button class="btn-primary" id="addTaskBtnTasks">+ New Task</button>
+      </header>
+
+      <div class="filter-bar">
+        <button class="filter-chip active" data-filter="all">All</button>
+        <button class="filter-chip chip-high" data-filter="High">🔴 High</button>
+        <button class="filter-chip chip-medium" data-filter="Medium">🟡 Medium</button>
+        <button class="filter-chip chip-low" data-filter="Low">🟢 Low</button>
+        <button class="filter-chip chip-done" data-filter="Completed">✔️ Completed</button>
+      </div>
+
+      <div id="taskListContainer" class="task-list"></div>
+      <p id="noTasksMsg" class="empty-msg hidden">No tasks yet. Click "+ New Task" to add one!</p>
+    </section>
+
+    <!-- ---------- ADMIN VIEW ---------- -->
+    <section id="adminView" class="view hidden">
+      <header class="view-header">
+        <div>
+          <h2>🛡️ Admin Panel</h2>
+          <p class="subtitle">All users' tasks — view and manage priority</p>
+        </div>
+      </header>
+
+      <div class="stat-cards" id="adminStatCards">
+        <div class="stat-card stat-total">
+          <span class="stat-value" id="adminStatUsers">0</span>
+          <span class="stat-label">Total Users</span>
+        </div>
+        <div class="stat-card stat-total">
+          <span class="stat-value" id="adminStatTasks">0</span>
+          <span class="stat-label">Total Tasks</span>
+        </div>
+        <div class="stat-card stat-high">
+          <span class="stat-value" id="adminStatHigh">0</span>
+          <span class="stat-label">High Priority</span>
+        </div>
+        <div class="stat-card stat-done">
+          <span class="stat-value" id="adminStatDone">0</span>
+          <span class="stat-label">Completed</span>
+        </div>
+      </div>
+
+      <div class="charts-grid">
+        <div class="chart-card chart-card-wide">
+          <h3>All Users — Tasks by Priority</h3>
+          <canvas id="adminPriorityChart"></canvas>
+        </div>
+      </div>
+
+      <div class="filter-bar">
+        <input type="text" id="adminSearchInput" class="admin-search" placeholder="🔎 Search by user name or email..." />
+      </div>
+
+      <div id="adminTaskListContainer" class="task-list"></div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ===================== TASK MODAL ===================== -->
+<div id="taskModal" class="modal-overlay hidden">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3 id="modalTitle">New Task</h3>
+      <button id="closeModalBtn" class="btn-close">✕</button>
+    </div>
+    <form id="taskForm">
+      <input type="hidden" id="taskId" />
+      <label>Title</label>
+      <input type="text" id="taskTitle" required maxlength="120" placeholder="e.g. Follow up with student leads" />
+
+      <label>Description</label>
+      <textarea id="taskDescription" rows="3" maxlength="500" placeholder="Add details..."></textarea>
+
+      <div class="form-row">
+        <div class="form-col">
+          <label>Priority</label>
+          <select id="taskPriority">
+            <option value="High">🔴 High</option>
+            <option value="Medium" selected>🟡 Medium</option>
+            <option value="Low">🟢 Low</option>
+          </select>
+        </div>
+        <div class="form-col">
+          <label>Due Date</label>
+          <input type="date" id="taskDueDate" />
+        </div>
+      </div>
+
+      <label class="checkbox-label">
+        <input type="checkbox" id="taskCompleted" />
+        Mark as Completed
+      </label>
+
+      <div class="modal-actions">
+        <button type="button" id="deleteTaskBtn" class="btn-danger hidden">Delete</button>
+        <button type="submit" class="btn-primary">Save Task</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="toast" class="toast hidden"></div>
+
+<!-- Firebase Compat SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore-compat.js"></script>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+
+<script src="firebase-config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
